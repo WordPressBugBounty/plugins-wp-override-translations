@@ -7,7 +7,7 @@ class WP_Override_Translations_Admin {
     public function __construct() {
 
         if (!function_exists('get_plugin_data')) {
-            require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+            require_once(ABSPATH . 'wp-admin/includes/plugin.php');
         }
 
         $this->pluginDetails = get_plugin_data(WP_OVERRIDE_TRANSLATIONS_PLUGIN_DIR . '/index.php');
@@ -17,17 +17,15 @@ class WP_Override_Translations_Admin {
     }
 
     public function add_menu_admin() {
-        add_options_page('WP Override Translations', 'WP Override Translations', 'administrator', 'wp-override-translations', [$this, 'setting_page']);
+        add_options_page('WP Override Translations', 'WP Override Translations', 'manage_options', 'wp-override-translations', [$this, 'setting_page']);
     }
 
     public function settings_init() {
+        if (get_option(WP_OVERRIDE_TRANSLATIONS_LINES) === false) {
+            add_option(WP_OVERRIDE_TRANSLATIONS_LINES, []);
+        }
 
         register_setting(WP_OVERRIDE_TRANSLATIONS, WP_OVERRIDE_TRANSLATIONS_LINES, [$this, 'validate_translations_and_save']);
-
-//		if (get_option(WP_OVERRIDE_TRANSLATIONS_LINES) === false) {
-//
-//			update_option(WP_OVERRIDE_TRANSLATIONS_LINES, []);
-//		}
     }
 
     public function validate_translations_and_save($strings) {
@@ -39,10 +37,18 @@ class WP_Override_Translations_Admin {
             foreach ($strings['original'] as $key => $value) {
 
                 if (!empty($value)) {
+                    $js_enabled = '0';
+                    if (isset($strings['js_enabled']) && is_array($strings['js_enabled'])) {
+                        if (isset($strings['js_enabled'][$key])) {
+                            $js_enabled = $strings['js_enabled'][$key];
+                        }
+                    }
+
                     $updateTranslations[] = [
-                        'original' => $value,
-                        'overwrite' => $strings['overwrite'][$key],
-                        'descriptions' => $strings['descriptions'][$key],
+                        'original' => wp_kses_post($value),
+                        'overwrite' => isset($strings['overwrite'][$key]) ? wp_kses_post($strings['overwrite'][$key]) : '',
+                        'js_enabled' => $js_enabled,
+                        'css_selector' => isset($strings['css_selector'][$key]) ? sanitize_text_field($strings['css_selector'][$key]) : ''
                     ];
                 }
             }
@@ -57,8 +63,8 @@ class WP_Override_Translations_Admin {
             return true;
         }
 
-        wp_enqueue_script('wp_override_translations_js', WP_OVERRIDE_TRANSLATIONS_PLUGIN_URL . 'js/main.js', ['jquery']);
-        ?>
+        wp_enqueue_script('wp_override_translations_js', WP_OVERRIDE_TRANSLATIONS_PLUGIN_URL . 'js/main.js', ['jquery'], false, true);
+?>
         <div class="wrap">
             <h2><?php _e("WP Override Translations Settings"); ?></h2>
 
@@ -72,7 +78,8 @@ class WP_Override_Translations_Admin {
                         <tr valign="top">
                             <th scope="column"><?php _e('Original Translation'); ?></th>
                             <th scope="column"><?php _e('New translation (Override)'); ?></th>
-                            <th scope="column"><?php _e('Description (visible only to the admin)'); ?></th>
+                            <th scope="column"><?php _e('Enable JS'); ?></th>
+                            <th scope="column"><?php _e('CSS Selector'); ?></th>
                             <th scope="column"></th>
                         </tr>
                     </thead>
@@ -82,13 +89,16 @@ class WP_Override_Translations_Admin {
                             <?php foreach ($translations as $key => $value) : ?>
                                 <tr valign="top" id="row_id_<?php print $key; ?>_translate">
                                     <td>
-                                        <input type="text" style="width:100%;" name="<?php print WP_OVERRIDE_TRANSLATIONS_LINES; ?>[original][]" value="<?php if (isset($value['original'])) echo esc_html(htmlspecialchars($value['original'])); ?>" />
+                                        <input type="text" style="width:100%;" name="<?php print WP_OVERRIDE_TRANSLATIONS_LINES; ?>[original][]" value="<?php if (isset($value['original'])) echo esc_attr($value['original']); ?>" />
                                     </td>
                                     <td>
-                                        <input type="text" style="width:100%;" name="<?php print WP_OVERRIDE_TRANSLATIONS_LINES; ?>[overwrite][]" value="<?php if (isset($value['overwrite'])) echo esc_html($value['overwrite']); ?>" />
+                                        <input type="text" style="width:100%;" name="<?php print WP_OVERRIDE_TRANSLATIONS_LINES; ?>[overwrite][]" value="<?php if (isset($value['overwrite'])) echo esc_attr($value['overwrite']); ?>" />
                                     </td>
-                                    <td class="td_textarea">
-                                        <textarea style="width:100%;" rows="3" name="<?php print WP_OVERRIDE_TRANSLATIONS_LINES; ?>[descriptions][]"><?php if (isset($value['descriptions'])) echo esc_html($value['descriptions']); ?></textarea>
+                                    <td style="text-align: center;">
+                                        <input type="checkbox" name="<?php print WP_OVERRIDE_TRANSLATIONS_LINES; ?>[js_enabled][<?php echo $key; ?>]" value="1" <?php checked(isset($value['js_enabled']) ? $value['js_enabled'] : '0', '1'); ?> />
+                                    </td>
+                                    <td>
+                                        <input type="text" style="width:100%;" name="<?php print WP_OVERRIDE_TRANSLATIONS_LINES; ?>[css_selector][]" value="<?php if (isset($value['css_selector'])) echo esc_attr($value['css_selector']); ?>" placeholder="e.g. #booking_date_from, .my-class" />
                                     </td>
                                     <td>
                                         <span class="dashicons dashicons-no deleteTranslateAction" style="cursor: pointer; color: red;" id="row_id_<?php print $key; ?>"></span>
@@ -103,8 +113,11 @@ class WP_Override_Translations_Admin {
                             <td>
                                 <input type="text" style="width:100%;" name="<?php print WP_OVERRIDE_TRANSLATIONS_LINES; ?>[overwrite][]" />
                             </td>
-                            <td class="td_textarea">
-                                <textarea style="width:100%;" rows="3" name="<?php print WP_OVERRIDE_TRANSLATIONS_LINES; ?>[descriptions][]"></textarea>
+                            <td style="text-align: center;">
+                                <input type="checkbox" name="<?php print WP_OVERRIDE_TRANSLATIONS_LINES; ?>[js_enabled][]" value="1" />
+                            </td>
+                            <td>
+                                <input type="text" style="width:100%;" name="<?php print WP_OVERRIDE_TRANSLATIONS_LINES; ?>[css_selector][]" placeholder="e.g. #booking_date_from, .my-class" />
                             </td>
                         </tr>
                     </tbody>
@@ -115,7 +128,6 @@ class WP_Override_Translations_Admin {
                 </p>
             </form>
         </div>
-        <?php
+<?php
     }
-
 }
