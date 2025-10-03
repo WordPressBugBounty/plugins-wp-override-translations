@@ -4,7 +4,7 @@
  * Plugin Name: WP Override Translations
  * Plugin URI: https://wordpress-plugins.luongovincenzo.it/#wp-override-translations
  * Description: Thanks to this plugin you can translate all the strings of your portal through the admin panel.
- * Version: 2.0.0
+ * Version: 3.0.0
  * Author: Vincenzo Luongo
  * Author URI: https://www.luongovincenzo.it/
  * License: GPLv2 or later
@@ -29,12 +29,12 @@ class WP_Override_Translations_Init {
 
         if (!is_admin()) {
             require_once('php/frontend.php');
-            $WP_Override_Translations = new WP_Override_Translations();
+            $wp_override_translations = new WP_Override_Translations();
         }
 
         if (is_admin()) {
             require_once('php/admin.php');
-            $WP_Override_Translations_Admin = new WP_Override_Translations_Admin();
+            $wp_override_translations_admin = new WP_Override_Translations_Admin();
 
             add_filter('plugin_action_links_' . plugin_basename(__FILE__), [$this, 'add_plugin_actions']);
         }
@@ -47,9 +47,9 @@ class WP_Override_Translations_Init {
     }
 
     public function add_plugin_actions($links) {
-        $links[] = '<a href="' . esc_url(get_admin_url(null, 'options-general.php?page=wp-override-translations')) . '">Manage Translations</a>';
+        $links[] = '<a href="' . esc_url(get_admin_url(null, 'options-general.php?page=wp-override-translations')) . '">' . __('Manage Translations', 'wp-override-translations') . '</a>';
         return $links;
     }
 }
 
-$WP_Override_Translations_Init = new WP_Override_Translations_Init();
+$wp_override_translations_init = new WP_Override_Translations_Init();

@@ -30,6 +30,11 @@ class WP_Override_Translations_Admin {
 
     public function validate_translations_and_save($strings) {
 
+        // Check user capabilities
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'wp-override-translations'));
+        }
+
         $updateTranslations = [];
 
         if (!empty($strings['original']) && count($strings['original']) > 0) {
@@ -64,9 +69,13 @@ class WP_Override_Translations_Admin {
         }
 
         wp_enqueue_script('wp_override_translations_js', WP_OVERRIDE_TRANSLATIONS_PLUGIN_URL . 'js/main.js', ['jquery'], false, true);
+
+        wp_localize_script('wp_override_translations_js', 'wpOverrideTranslations', [
+            'optionName' => WP_OVERRIDE_TRANSLATIONS_LINES,
+        ]);
 ?>
         <div class="wrap">
-            <h2><?php _e("WP Override Translations Settings"); ?></h2>
+            <h2><?php _e("WP Override Translations Settings", 'wp-override-translations'); ?></h2>
 
             <form method="POST" action="options.php">
 
@@ -76,10 +85,10 @@ class WP_Override_Translations_Admin {
                 <table class="form-table">
                     <thead>
                         <tr valign="top">
-                            <th scope="column"><?php _e('Original Translation'); ?></th>
-                            <th scope="column"><?php _e('New translation (Override)'); ?></th>
-                            <th scope="column"><?php _e('Enable JS'); ?></th>
-                            <th scope="column"><?php _e('CSS Selector'); ?></th>
+                            <th scope="column"><?php _e('Original Translation', 'wp-override-translations'); ?></th>
+                            <th scope="column"><?php _e('New translation (Override)', 'wp-override-translations'); ?></th>
+                            <th scope="column"><?php _e('Enable JS', 'wp-override-translations'); ?></th>
+                            <th scope="column"><?php _e('CSS Selector', 'wp-override-translations'); ?></th>
                             <th scope="column"></th>
                         </tr>
                     </thead>
@@ -123,8 +132,8 @@ class WP_Override_Translations_Admin {
                     </tbody>
                 </table>
                 <p class="submit">
-                    <input type="submit" class="button-primary" style="margin:5px;" value="<?php _e('Save') ?>" />
-                    <span class="button-primary" style="margin:5px;" onClick="addRowTranslate();">Add New Overwrite Translate</span>
+                    <input type="submit" class="button-primary" style="margin:5px;" value="<?php _e('Save', 'wp-override-translations') ?>" />
+                    <button type="button" class="button-primary" id="add-new-translation" style="margin:5px;"><?php _e('Add New Overwrite Translate', 'wp-override-translations'); ?></button>
                 </p>
             </form>
         </div>
