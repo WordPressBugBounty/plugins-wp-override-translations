@@ -1,35 +1,64 @@
-jQuery(document).ready(function ($) {
-    // Handle delete translation action
-    $('.deleteTranslateAction').on('click', function (e) {
-        var rowID = $(this).attr('id') + '_translate';
-        $('#' + rowID).remove();
+document.addEventListener('DOMContentLoaded', function () {
+    var tbody = document.getElementById('rowsTranslations');
+    var counter = document.getElementById('wot-count');
+    var optionName = wpOverrideTranslations.optionName;
+
+    // Update the counter badge
+    function updateCounter() {
+        if (!counter) return;
+        var rows = tbody.querySelectorAll('tr');
+        // Count rows that have a value in the original input
+        var count = 0;
+        rows.forEach(function (row) {
+            var input = row.querySelector('input[name="' + optionName + '[original][]"]');
+            if (input && input.value.trim() !== '') {
+                count++;
+            }
+        });
+        counter.textContent = count;
+    }
+
+    // Handle delete translation action (event delegation)
+    tbody.addEventListener('click', function (e) {
+        var target = e.target;
+        if (target.classList.contains('deleteTranslateAction')) {
+            var row = target.closest('tr');
+            if (row) {
+                row.remove();
+                updateCounter();
+            }
+        }
     });
 
     // Handle add new translation button
-    $('#add-new-translation').on('click', function(e) {
-        e.preventDefault();
-        addRowTranslate();
-    });
+    var addBtn = document.getElementById('add-new-translation');
+    if (addBtn) {
+        addBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            addRowTranslate();
+        });
+    }
+
+    function addRowTranslate() {
+        var row = document.createElement('tr');
+
+        row.innerHTML =
+            '<td>' +
+            '    <input type="text" name="' + optionName + '[original][]" />' +
+            '</td>' +
+            '<td>' +
+            '    <input type="text" name="' + optionName + '[overwrite][]" />' +
+            '</td>' +
+            '<td class="column-js">' +
+            '    <input type="checkbox" name="' + optionName + '[js_enabled][]" value="1" />' +
+            '</td>' +
+            '<td>' +
+            '    <input type="text" name="' + optionName + '[css_selector][]" placeholder="e.g. #booking_date_from, .my-class" />' +
+            '</td>' +
+            '<td class="column-actions">' +
+            '    <span class="dashicons dashicons-no wot-delete-btn deleteTranslateAction"></span>' +
+            '</td>';
+
+        tbody.appendChild(row);
+    }
 });
-
-function addRowTranslate() {
-    var optionName = wpOverrideTranslations.optionName;
-    var row = '';
-
-    row += '<tr valign="top">';
-    row += '    <td>';
-    row += '        <input type="text" style="width:100%;" name="' + optionName + '[original][]" />';
-    row += '    </td>';
-    row += '    <td>';
-    row += '        <input type="text" style="width:100%;" name="' + optionName + '[overwrite][]" />';
-    row += '    </td>';
-    row += '    <td style="text-align: center;">';
-    row += '        <input type="checkbox" name="' + optionName + '[js_enabled][]" value="1" />';
-    row += '    </td>';
-    row += '    <td>';
-    row += '        <input type="text" style="width:100%;" name="' + optionName + '[css_selector][]" placeholder="e.g. #booking_date_from, .my-class" />';
-    row += '    </td>';
-    row += '</tr>';
-
-    jQuery('#rowsTranslations').append(row);
-}

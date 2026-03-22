@@ -23,7 +23,7 @@ class WP_Override_Translations {
             if (!empty($override['original']) && !empty($override['overwrite'])) {
                 $this->translationMap[$override['original']] = $override['overwrite'];
 
-                if (isset($override['js_enabled']) && $override['js_enabled'] == '1') {
+                if (isset($override['js_enabled']) && $override['js_enabled'] === '1') {
                     $this->jsEnabledTranslations[$override['original']] = [
                         'translation' => $override['overwrite'],
                         'selector' => isset($override['css_selector']) ? $override['css_selector'] : ''
@@ -40,16 +40,13 @@ class WP_Override_Translations {
         }
 
         foreach ($this->translationMap as $findOriginal => $replaceOverwrite) {
-            // If the string contains HTML, use regex to replace only text and not tags
             if (strip_tags($translatedString) !== $translatedString || strip_tags($replaceOverwrite) !== $replaceOverwrite) {
-                // Special handling for HTML
                 $translatedString = preg_replace(
                     '/(?<=>)' . preg_quote($findOriginal, '/') . '(?=<)|(?<=>)' . preg_quote($findOriginal, '/') . '$/i',
                     $replaceOverwrite,
                     $translatedString
                 );
             } else {
-                // Normal replacement for plain text
                 $translatedString = str_ireplace($findOriginal, $replaceOverwrite, $translatedString);
             }
         }
@@ -63,140 +60,116 @@ class WP_Override_Translations {
             return;
         }
 
-        wp_register_script('translations-inline-js', false);
+        wp_register_script('translations-inline-js', false, [], WP_OVERRIDE_TRANSLATIONS_VERSION, true);
         wp_enqueue_script('translations-inline-js');
 
-        $translations_json = json_encode($this->jsEnabledTranslations, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $translations_json = wp_json_encode($this->jsEnabledTranslations, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
-        $inline_js = "const translations = $translations_json; " . PHP_EOL;
+        $inline_js = "var wpOtTranslations = " . $translations_json . ";\n";
         $inline_js .= <<<'JS'
 			document.addEventListener('DOMContentLoaded', function () {
 				try {
-					const ATTRIBUTES_TO_CHECK = ['placeholder', 'title', 'alt'];
-					let isObserving = false;
-					let observer = null;
+					var ATTRIBUTES_TO_CHECK = ['placeholder', 'title', 'alt'];
+					var isObserving = false;
+					var observer = null;
 
-					// Partial and case-insensitive replacement
-					const replaceTextUsingMap = (text, translations) => {
+					var replaceTextUsingMap = function (text, map) {
 						if (!text) return text;
 
 						try {
-							// Sort keys from longest to shortest to avoid premature partial replacements
-							const sortedKeys = Object.keys(translations).sort((a, b) => b.length - a.length);
+							var sortedKeys = Object.keys(map).sort(function (a, b) { return b.length - a.length; });
 
-							sortedKeys.forEach(original => {
-								const translation = translations[original];
-								// Build a regex with word boundaries, case-insensitive
-								const regex = new RegExp(`\\b${escapeRegExp(original)}\\b`, 'gi');
-								text = text.replace(regex, match => preserveCase(match, translation));
+							sortedKeys.forEach(function (original) {
+								var translation = map[original];
+								var regex = new RegExp(escapeRegExp(original), 'gi');
+								text = text.replace(regex, function (match) { return preserveCase(match, translation); });
 							});
 
 							return text;
 						} catch (e) {
-							console.warn('Error in replaceTextUsingMap:', e);
 							return text;
 						}
 					};
 
-					// Escape special characters in regex
-					const escapeRegExp = (string) => {
-						try {
-							return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-						} catch (e) {
-							console.warn('Error in escapeRegExp:', e);
-							return string;
-						}
+					var escapeRegExp = function (string) {
+						return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 					};
 
-					// Preserve original capitalization
-					const preserveCase = (source, target) => {
-						try {
-							if (source === source.toUpperCase()) return target.toUpperCase();
-							if (source === source.toLowerCase()) return target.toLowerCase();
-							if (source[0] === source[0].toUpperCase()) return target.charAt(0).toUpperCase() + target.slice(1);
-							return target;
-						} catch (e) {
-							console.warn('Error in preserveCase:', e);
-							return target;
-						}
+					var preserveCase = function (source, target) {
+						if (source === source.toUpperCase()) return target.toUpperCase();
+						if (source === source.toLowerCase()) return target.toLowerCase();
+						if (source[0] === source[0].toUpperCase()) return target.charAt(0).toUpperCase() + target.slice(1);
+						return target;
 					};
 
-					// Collect all unique selectors from translations
-					const collectSelectors = () => {
-						try {
-							const selectors = new Set();
-							Object.values(translations).forEach(item => {
-								if (item.selector && item.selector.trim()) {
-									// Separate multiple selectors
-									const selectorList = item.selector.split(',').map(s => s.trim()).filter(s => s);
-									selectorList.forEach(sel => selectors.add(sel));
-								}
-							});
-							return Array.from(selectors);
-						} catch (e) {
-							console.warn('Error collecting selectors:', e);
-							return [];
-						}
-					};
-
-					const selectors = collectSelectors();
-
-					// Create translation map for replacements
-					const translationTextMap = {};
-					try {
-						Object.entries(translations).forEach(([original, data]) => {
-							translationTextMap[original] = data.translation;
+					var collectSelectors = function () {
+						var selectors = [];
+						var seen = {};
+						Object.keys(wpOtTranslations).forEach(function (key) {
+							var item = wpOtTranslations[key];
+							if (item.selector && item.selector.trim()) {
+								var selectorList = item.selector.split(',').map(function (s) { return s.trim(); }).filter(function (s) { return s; });
+								selectorList.forEach(function (sel) {
+									if (!seen[sel]) {
+										seen[sel] = true;
+										selectors.push(sel);
+									}
+								});
+							}
 						});
-					} catch (e) {
-						console.warn('Error creating translation map:', e);
-					}
+						return selectors;
+					};
+
+					var selectors = collectSelectors();
+
+					var translationTextMap = {};
+					Object.keys(wpOtTranslations).forEach(function (original) {
+						translationTextMap[original] = wpOtTranslations[original].translation;
+					});
 
 					if (selectors.length > 0) {
-						const applyTranslations = (targetElements = null) => {
-							const elementsToCheck = targetElements || selectors.flatMap(sel => {
+						var applyTranslations = function (targetElements) {
+							var elementsToCheck = targetElements || selectors.reduce(function (acc, sel) {
 								try {
-									return Array.from(document.querySelectorAll(sel));
+									return acc.concat(Array.from(document.querySelectorAll(sel)));
 								} catch (e) {
-									console.warn('Invalid selector:', sel, e);
-									return [];
+									return acc;
 								}
-							});
+							}, []);
 
-							elementsToCheck.forEach(el => {
+							elementsToCheck.forEach(function (el) {
 								try {
-									// 1. Text content translation
-									const processNode = (node) => {
-										try {
-											if (node.nodeType === Node.TEXT_NODE) {
-												const originalText = node.textContent.trim();
-												if (originalText) {
-													const newText = replaceTextUsingMap(originalText, translationTextMap);
-													if (originalText !== newText) {
-														node.textContent = newText;
-													}
+									var processNode = function (node) {
+										if (node.nodeType === Node.TEXT_NODE) {
+											var originalText = node.textContent.trim();
+											if (originalText) {
+												var newText = replaceTextUsingMap(originalText, translationTextMap);
+												if (originalText !== newText) {
+													node.textContent = newText;
 												}
-											} else if (node.nodeType === Node.ELEMENT_NODE) {
-												// For elements, process child nodes
-												Array.from(node.childNodes).forEach(child => processNode(child));
 											}
-										} catch (e) {
-											console.warn('Error processing node:', e);
+										} else if (node.nodeType === Node.ELEMENT_NODE) {
+											Array.from(node.childNodes).forEach(function (child) { processNode(child); });
 										}
 									};
 
-									// If there's HTML in the translation, use innerHTML
-									let hasHtmlTranslation = false;
-									Object.values(translations).forEach(item => {
-										if (item.translation && item.translation !== item.translation.replace(/<[^>]*>/g, '')) {
-											hasHtmlTranslation = true;
-										}
+									var hasHtmlTranslation = Object.keys(wpOtTranslations).some(function (key) {
+										var t = wpOtTranslations[key].translation;
+										return t && t !== t.replace(/<[^>]*>/g, '');
 									});
 
 									if (hasHtmlTranslation && el.childNodes.length === 1 && el.childNodes[0].nodeType === Node.TEXT_NODE) {
-										const originalText = el.textContent.trim();
-										const newText = replaceTextUsingMap(originalText, translationTextMap);
-										if (originalText !== newText && newText.includes('<')) {
-											el.innerHTML = newText;
+										var originalText = el.textContent.trim();
+										var newText = replaceTextUsingMap(originalText, translationTextMap);
+										if (originalText !== newText && newText.indexOf('<') !== -1) {
+											// Use DOMParser to safely parse HTML instead of innerHTML
+											var parser = new DOMParser();
+											var doc = parser.parseFromString('<span>' + newText + '</span>', 'text/html');
+											var parsed = doc.body.firstChild;
+											el.textContent = '';
+											while (parsed.firstChild) {
+												el.appendChild(parsed.firstChild);
+											}
 										} else if (originalText !== newText) {
 											el.textContent = newText;
 										}
@@ -204,72 +177,58 @@ class WP_Override_Translations {
 										processNode(el);
 									}
 
-									// 2. Partial attribute translation
-									ATTRIBUTES_TO_CHECK.forEach(attr => {
-										try {
-											const attrValue = el.getAttribute(attr);
-											if (attrValue) {
-												const newAttr = replaceTextUsingMap(attrValue.trim(), translationTextMap);
-												if (attrValue !== newAttr) {
-													el.setAttribute(attr, newAttr);
-												}
+									ATTRIBUTES_TO_CHECK.forEach(function (attr) {
+										var attrValue = el.getAttribute(attr);
+										if (attrValue) {
+											var newAttr = replaceTextUsingMap(attrValue.trim(), translationTextMap);
+											if (attrValue !== newAttr) {
+												el.setAttribute(attr, newAttr);
 											}
-										} catch (e) {
-											console.warn('Error processing attribute:', attr, e);
 										}
 									});
 								} catch (e) {
-									console.warn('Error applying translations to element:', el, e);
+									// Skip element on error
 								}
 							});
 						};
 
-						// Apply immediately
 						applyTranslations();
 
-						// Use MutationObserver for better performance instead of setInterval
 						if (window.MutationObserver && !isObserving) {
-							observer = new MutationObserver((mutations) => {
-								try {
-									const addedElements = [];
-									mutations.forEach(mutation => {
-										if (mutation.type === 'childList') {
-											mutation.addedNodes.forEach(node => {
-												if (node.nodeType === Node.ELEMENT_NODE) {
-													// Check if the added element matches any selector
-													selectors.forEach(sel => {
-														try {
-															if (node.matches && node.matches(sel)) {
-																addedElements.push(node);
-															}
-															// Also check descendants
-															const descendants = node.querySelectorAll ? node.querySelectorAll(sel) : [];
-															addedElements.push(...Array.from(descendants));
-														} catch (e) {
-															console.warn('Error checking selector on mutation:', sel, e);
+							observer = new MutationObserver(function (mutations) {
+								var addedElements = [];
+								mutations.forEach(function (mutation) {
+									if (mutation.type === 'childList') {
+										mutation.addedNodes.forEach(function (node) {
+											if (node.nodeType === Node.ELEMENT_NODE) {
+												selectors.forEach(function (sel) {
+													try {
+														if (node.matches && node.matches(sel)) {
+															addedElements.push(node);
 														}
-													});
-												}
-											});
-										} else if (mutation.type === 'attributes') {
-											// Re-check the element if its attributes changed
-											selectors.forEach(sel => {
-												try {
-													if (mutation.target.matches && mutation.target.matches(sel)) {
-														addedElements.push(mutation.target);
+														var descendants = node.querySelectorAll ? node.querySelectorAll(sel) : [];
+														Array.from(descendants).forEach(function (d) { addedElements.push(d); });
+													} catch (e) {
+														// Skip invalid selector
 													}
-												} catch (e) {
-													console.warn('Error checking selector on attribute mutation:', sel, e);
+												});
+											}
+										});
+									} else if (mutation.type === 'attributes') {
+										selectors.forEach(function (sel) {
+											try {
+												if (mutation.target.matches && mutation.target.matches(sel)) {
+													addedElements.push(mutation.target);
 												}
-											});
-										}
-									});
-
-									if (addedElements.length > 0) {
-										applyTranslations(addedElements);
+											} catch (e) {
+												// Skip invalid selector
+											}
+										});
 									}
-								} catch (e) {
-									console.warn('Error in MutationObserver callback:', e);
+								});
+
+								if (addedElements.length > 0) {
+									applyTranslations(addedElements);
 								}
 							});
 
@@ -281,14 +240,10 @@ class WP_Override_Translations {
 							});
 
 							isObserving = true;
-						} else if (!window.MutationObserver) {
-							// Fallback to interval for older browsers
-							console.warn('MutationObserver not supported, falling back to interval');
-							setInterval(() => applyTranslations(), 500); // Less frequent than before
 						}
 					}
 				} catch (e) {
-					console.error('Critical error in WP Override Translations:', e);
+					// Silent fail in production
 				}
 			});
 
