@@ -1,0 +1,100 @@
+# Copyright (C) 2026 Vincenzo Luongo
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Override String Translations 4.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wp-override-translations\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-09-16T10:41:03+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: wp-override-translations\n"
+
+#. Plugin Name of the plugin
+#: index.php
+#: php/admin.php:17
+msgid "Override String Translations"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: index.php
+msgid "https://wordpress-plugins.luongovincenzo.it/plugin/wp-override-translations"
+msgstr ""
+
+#. Description of the plugin
+#: index.php
+msgid "Change any text of WordPress, WooCommerce, plugins and themes from the admin panel."
+msgstr ""
+
+#. Author of the plugin
+#: index.php
+msgid "Vincenzo Luongo"
+msgstr ""
+
+#. Author URI of the plugin
+#: index.php
+msgid "https://www.luongovincenzo.it/"
+msgstr ""
+
+#: index.php:62
+msgid "Manage Translations"
+msgstr ""
+
+#: php/admin.php:18
+msgid "Override Translations"
+msgstr ""
+
+#: php/admin.php:49
+msgid "You do not have sufficient permissions to access this page."
+msgstr ""
+
+#: php/admin.php:81
+msgid "Enter the text as your visitors see it (matching is case-insensitive) and the text to show instead. HTML is allowed in the replacement. If some text is still not replaced (e.g. text loaded by JavaScript), enable JS and enter the CSS selector of the element that contains it."
+msgstr ""
+
+#: php/admin.php:89
+msgid "Translation Overrides"
+msgstr ""
+
+#: php/admin.php:96
+#: php/admin.php:136
+msgid "Original Translation"
+msgstr ""
+
+#: php/admin.php:97
+#: php/admin.php:139
+msgid "New translation (Override)"
+msgstr ""
+
+#: php/admin.php:98
+msgid "JS"
+msgstr ""
+
+#: php/admin.php:99
+#: php/admin.php:145
+msgid "CSS Selector"
+msgstr ""
+
+#: php/admin.php:117
+msgid "Save"
+msgstr ""
+
+#: php/admin.php:118
+msgid "Add New Override"
+msgstr ""
+
+#: php/admin.php:142
+msgid "Enable JS"
+msgstr ""
+
+#: php/admin.php:145
+msgid "e.g. #booking_date_from, .my-class"
+msgstr ""
+
+#: php/admin.php:148
+msgid "Remove override"
+msgstr ""

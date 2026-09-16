@@ -1,0 +1,102 @@
+# Copyright (C) 2026 Vincenzo Luongo
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Override String Translations 4.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/wp-override-translations\n"
+"Last-Translator: Vincenzo Luongo\n"
+"Language-Team: Italian\n"
+"Language: it_IT\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"POT-Creation-Date: 2026-09-16T10:41:03+00:00\n"
+"PO-Revision-Date: 2026-09-16 12:45+0200\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: wp-override-translations\n"
+
+#. Plugin Name of the plugin
+#: index.php
+#: php/admin.php:17
+msgid "Override String Translations"
+msgstr "Override String Translations"
+
+#. Plugin URI of the plugin
+#: index.php
+msgid "https://wordpress-plugins.luongovincenzo.it/plugin/wp-override-translations"
+msgstr "https://wordpress-plugins.luongovincenzo.it/plugin/wp-override-translations"
+
+#. Description of the plugin
+#: index.php
+msgid "Change any text of WordPress, WooCommerce, plugins and themes from the admin panel."
+msgstr "Modifica qualsiasi testo di WordPress, WooCommerce, plugin e temi dal pannello di amministrazione."
+
+#. Author of the plugin
+#: index.php
+msgid "Vincenzo Luongo"
+msgstr "Vincenzo Luongo"
+
+#. Author URI of the plugin
+#: index.php
+msgid "https://www.luongovincenzo.it/"
+msgstr "https://www.luongovincenzo.it/"
+
+#: index.php:62
+msgid "Manage Translations"
+msgstr "Gestisci traduzioni"
+
+#: php/admin.php:18
+msgid "Override Translations"
+msgstr "Sovrascrivi traduzioni"
+
+#: php/admin.php:49
+msgid "You do not have sufficient permissions to access this page."
+msgstr "Non hai i permessi sufficienti per accedere a questa pagina."
+
+#: php/admin.php:81
+msgid "Enter the text as your visitors see it (matching is case-insensitive) and the text to show instead. HTML is allowed in the replacement. If some text is still not replaced (e.g. text loaded by JavaScript), enable JS and enter the CSS selector of the element that contains it."
+msgstr "Inserisci il testo come lo vedono i tuoi visitatori (maiuscole e minuscole sono indifferenti) e il testo da mostrare al suo posto. Nella nuova traduzione puoi usare l'HTML. Se un testo non viene comunque sostituito (ad es. un testo caricato via JavaScript), attiva JS e inserisci il selettore CSS dell'elemento che lo contiene."
+
+#: php/admin.php:89
+msgid "Translation Overrides"
+msgstr "Traduzioni sovrascritte"
+
+#: php/admin.php:96
+#: php/admin.php:136
+msgid "Original Translation"
+msgstr "Traduzione originale"
+
+#: php/admin.php:97
+#: php/admin.php:139
+msgid "New translation (Override)"
+msgstr "Nuova traduzione"
+
+#: php/admin.php:98
+msgid "JS"
+msgstr "JS"
+
+#: php/admin.php:99
+#: php/admin.php:145
+msgid "CSS Selector"
+msgstr "Selettore CSS"
+
+#: php/admin.php:117
+msgid "Save"
+msgstr "Salva"
+
+#: php/admin.php:118
+msgid "Add New Override"
+msgstr "Aggiungi traduzione"
+
+#: php/admin.php:142
+msgid "Enable JS"
+msgstr "Attiva JS"
+
+#: php/admin.php:145
+msgid "e.g. #booking_date_from, .my-class"
+msgstr "es. #booking_date_from, .mia-classe"
+
+#: php/admin.php:148
+msgid "Remove override"
+msgstr "Rimuovi traduzione"

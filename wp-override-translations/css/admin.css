@@ -1,0 +1,90 @@
+.wot-card {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    padding: 20px;
+    margin-top: 15px;
+}
+
+.wot-card h2 {
+    margin-top: 0;
+}
+
+.wot-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.wot-table thead th {
+    text-align: left;
+    padding: 10px 8px;
+    border-bottom: 2px solid #c3c4c7;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.wot-table tbody tr {
+    border-bottom: 1px solid #f0f0f1;
+}
+
+.wot-table tbody tr:hover {
+    background: #f6f7f7;
+}
+
+.wot-table td {
+    padding: 8px;
+    vertical-align: middle;
+}
+
+.wot-table input[type="text"] {
+    width: 100%;
+}
+
+.wot-table input[type="checkbox"] {
+    margin: 0;
+}
+
+.wot-table .column-js {
+    width: 70px;
+    text-align: center;
+}
+
+.wot-table .column-actions {
+    width: 40px;
+    text-align: center;
+}
+
+.wot-delete-btn {
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    color: #b32d2e;
+}
+
+.wot-delete-btn .dashicons {
+    font-size: 18px;
+}
+
+.wot-delete-btn:hover,
+.wot-delete-btn:focus {
+    color: #a00;
+}
+
+.wot-counter {
+    display: inline-block;
+    background: #2271b1;
+    color: #fff;
+    border-radius: 10px;
+    padding: 1px 8px;
+    font-size: 12px;
+    margin-left: 5px;
+    vertical-align: middle;
+}
+
+.wot-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 15px;
+}
